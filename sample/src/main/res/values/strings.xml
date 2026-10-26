@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SallaPush Sample</string>
+    <!-- The default notification channel's name in the system settings (meta-data com.salla.push.default_channel_name). -->
+    <string name="notification_channel_name">Store notifications</string>
+
+    <string name="customer_id_hint">Customer id</string>
+    <string name="customer_token_hint">Customer token</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_out">Sign out</string>
+    <string name="request_permission">Ask for notification permission</string>
+    <string name="opt_out">Opt out</string>
+    <string name="opt_in">Opt in</string>
+    <string name="add_tag">Tag this visit</string>
+    <string name="events_title">Events, newest first</string>
+
+    <string name="status">SallaPush %1$s, app %2$s\nDevice: %3$s\nNotifications allowed: %4$s\nOpted in: %5$s\nCustomer: %6$s\nTags: %7$d</string>
+    <string name="status_not_initialized">not initialised</string>
+    <string name="status_not_registered">not registered yet</string>
+    <string name="status_guest">guest</string>
+    <string name="status_signed_in">signed in as %1$s</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="none">none</string>
+    <string name="no_text">(no text)</string>
+
+    <string name="event_token_missing">Enter the customer id and the identity token first.</string>
+    <string name="event_permission_granted">Notifications are allowed.</string>
+    <string name="event_permission_denied">Notifications are not allowed.</string>
+    <string name="event_login_failed">Login failed: %1$s</string>
+    <string name="event_tap">Tapped: %1$s, data %2$s, launch URL %3$s</string>
+    <string name="event_foreground">About to show while the app is open: %1$s</string>
+</resources>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:name=".App"
+        android:label="SallaPush consumer check">
+
+        <!-- An app with its own FCM service (docs/REFERENCE.md's Java form), which forwards to SallaPush. -->
+        <service
+            android:name=".readme.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- The app's own service at priority 1, as README.md advises; the build checks that FCM delivers to it. -->
+        <service
+            android:name=".StorePushService"
+            android:exported="false">
+            <intent-filter android:priority="1">
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- docs/REFERENCE.md's removal line; the build checks that it removes SallaPush's fallback service. -->
+        <!-- snippet:remove-sdk-service -->
+        <service
+            android:name="com.salla.push.SallaPushFirebaseMessagingService"
+            tools:node="remove" />
+        <!-- end-snippet -->
+
+        <!--
+            docs/REFERENCE.md's on-demand WorkManager lines; the build checks that they remove WorkManager's startup
+            initializer. App implements Configuration.Provider, as WorkManager then requires.
+        -->
+        <!-- snippet:work-manager-on-demand -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+        <!-- end-snippet -->
+
+    </application>
+
+</manifest>

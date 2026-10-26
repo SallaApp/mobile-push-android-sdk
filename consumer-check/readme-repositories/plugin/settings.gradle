@@ -1,0 +1,14 @@
+// A build shaped like a React Native app's: Groovy scripts, no repositories in the settings, and a plugin that adds
+// repositories to every project (app/build.gradle). Its root build.gradle adds a stand-in for Maven Central to every
+// project, and its app resolves SallaPush through the projects' own repositories. ../../settings.gradle.kts includes
+// this build, and ../../app/build.gradle.kts makes every consumer check run its app's checkSallaPushResolves task.
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'readme-repositories-plugin'
+include ':app'

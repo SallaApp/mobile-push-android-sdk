@@ -1,0 +1,226 @@
+public final class com/salla/push/SallaPush {
+	public static final field INSTANCE Lcom/salla/push/SallaPush;
+	public static final fun getAppId ()Ljava/lang/String;
+	public static final fun getDebug ()Lcom/salla/push/SallaPushDebug;
+	public static final fun getMigration ()Lcom/salla/push/SallaPushMigration;
+	public static final fun getNotifications ()Lcom/salla/push/SallaPushNotifications;
+	public static final fun getSdkVersion ()Ljava/lang/String;
+	public static final fun getUser ()Lcom/salla/push/SallaPushUser;
+	public static final fun initWithContext (Landroid/content/Context;Ljava/lang/String;)V
+	public static final fun initWithContext (Landroid/content/Context;Ljava/lang/String;Lcom/salla/push/SallaPushConfig;)V
+	public static final fun isInitialized ()Z
+	public static final fun login (Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun logout ()V
+	public static final fun setConsentGiven (Z)V
+	public static final fun setConsentRequired (Z)V
+}
+
+public final class com/salla/push/SallaPushClickEvent {
+	public final fun getNotification ()Lcom/salla/push/SallaPushNotification;
+	public final fun getResult ()Lcom/salla/push/SallaPushClickResult;
+}
+
+public abstract interface class com/salla/push/SallaPushClickListener {
+	public abstract fun onClick (Lcom/salla/push/SallaPushClickEvent;)V
+}
+
+public final class com/salla/push/SallaPushClickResult {
+	public final fun getActionId ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+}
+
+public final class com/salla/push/SallaPushConfig {
+	public synthetic fun <init> (Lcom/salla/push/SallaPushConfig$Builder;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAppVersion ()Ljava/lang/String;
+	public final fun getAutoClearBadge ()Z
+	public final fun getAutoUpdateBadge ()Z
+	public final fun getClearTagsOnLogout ()Z
+	public final fun getLogLevel ()Lcom/salla/push/SallaPushLogLevel;
+	public final fun getOpenLaunchUrls ()Z
+	public final fun getRequiresUserConsent ()Z
+}
+
+public final class com/salla/push/SallaPushConfig$Builder {
+	public fun <init> ()V
+	public final fun build ()Lcom/salla/push/SallaPushConfig;
+	public final fun setAppVersion (Ljava/lang/String;)Lcom/salla/push/SallaPushConfig$Builder;
+	public final fun setAutoClearBadge (Z)Lcom/salla/push/SallaPushConfig$Builder;
+	public final fun setAutoUpdateBadge (Z)Lcom/salla/push/SallaPushConfig$Builder;
+	public final fun setClearTagsOnLogout (Z)Lcom/salla/push/SallaPushConfig$Builder;
+	public final fun setLogLevel (Lcom/salla/push/SallaPushLogLevel;)Lcom/salla/push/SallaPushConfig$Builder;
+	public final fun setOpenLaunchUrls (Z)Lcom/salla/push/SallaPushConfig$Builder;
+	public final fun setRequiresUserConsent (Z)Lcom/salla/push/SallaPushConfig$Builder;
+}
+
+public abstract interface class com/salla/push/SallaPushDebug {
+	public abstract fun addLogListener (Lcom/salla/push/SallaPushLogListener;)V
+	public abstract fun addLogListener (Lcom/salla/push/SallaPushLogListener;Lcom/salla/push/SallaPushLogLevel;)V
+	public abstract fun getLogLevel ()Lcom/salla/push/SallaPushLogLevel;
+	public abstract fun removeLogListener (Lcom/salla/push/SallaPushLogListener;)V
+	public abstract fun setLogLevel (Lcom/salla/push/SallaPushLogLevel;)V
+}
+
+public class com/salla/push/SallaPushFirebaseMessagingService : com/google/firebase/messaging/FirebaseMessagingService {
+	public fun <init> ()V
+	public fun onMessageReceived (Lcom/google/firebase/messaging/RemoteMessage;)V
+	public fun onNewToken (Ljava/lang/String;)V
+}
+
+public abstract interface class com/salla/push/SallaPushForegroundLifecycleListener {
+	public abstract fun onWillDisplay (Lcom/salla/push/SallaPushWillDisplayEvent;)V
+}
+
+public final class com/salla/push/SallaPushLogEvent {
+	public final fun getCategory ()Ljava/lang/String;
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getLevel ()Lcom/salla/push/SallaPushLogLevel;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getMetadata ()Ljava/util/Map;
+	public final fun getTimestampMillis ()J
+}
+
+public final class com/salla/push/SallaPushLogLevel : java/lang/Enum {
+	public static final field DEBUG Lcom/salla/push/SallaPushLogLevel;
+	public static final field ERROR Lcom/salla/push/SallaPushLogLevel;
+	public static final field INFO Lcom/salla/push/SallaPushLogLevel;
+	public static final field OFF Lcom/salla/push/SallaPushLogLevel;
+	public static final field VERBOSE Lcom/salla/push/SallaPushLogLevel;
+	public static final field WARN Lcom/salla/push/SallaPushLogLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/salla/push/SallaPushLogLevel;
+	public static fun values ()[Lcom/salla/push/SallaPushLogLevel;
+}
+
+public abstract interface class com/salla/push/SallaPushLogListener {
+	public abstract fun onLogEvent (Lcom/salla/push/SallaPushLogEvent;)V
+}
+
+public final class com/salla/push/SallaPushLoginFailure : java/lang/Enum {
+	public static final field INVALID_REQUEST Lcom/salla/push/SallaPushLoginFailure;
+	public static final field TOKEN_REJECTED Lcom/salla/push/SallaPushLoginFailure;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/salla/push/SallaPushLoginFailure;
+	public static fun values ()[Lcom/salla/push/SallaPushLoginFailure;
+}
+
+public abstract interface class com/salla/push/SallaPushMigration {
+	public abstract fun setDisplayCompatPayloads (Z)V
+}
+
+public final class com/salla/push/SallaPushNotification {
+	public final fun display ()V
+	public final fun getAdditionalData ()Ljava/util/Map;
+	public final fun getAndroidNotificationId ()I
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getBoolean (Ljava/lang/String;)Ljava/lang/Boolean;
+	public final fun getChannelId ()Ljava/lang/String;
+	public final fun getCollapseId ()Ljava/lang/String;
+	public final fun getImageUrl ()Ljava/lang/String;
+	public final fun getLaunchUrl ()Ljava/lang/String;
+	public final fun getLong (Ljava/lang/String;)Ljava/lang/Long;
+	public final fun getNotificationId ()Ljava/lang/String;
+	public final fun getRawPayload ()Ljava/util/Map;
+	public final fun getSound ()Ljava/lang/String;
+	public final fun getSource ()Lcom/salla/push/SallaPushPayloadSource;
+	public final fun getString (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getSubtitle ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+}
+
+public abstract interface class com/salla/push/SallaPushNotifications {
+	public abstract fun addClickListener (Lcom/salla/push/SallaPushClickListener;)V
+	public abstract fun addForegroundLifecycleListener (Lcom/salla/push/SallaPushForegroundLifecycleListener;)V
+	public abstract fun addPermissionObserver (Lcom/salla/push/SallaPushPermissionObserver;)V
+	public abstract fun canRequestPermission ()Z
+	public abstract fun clearAllNotifications ()V
+	public abstract fun getPermission ()Z
+	public abstract fun handleFirebaseMessage (Landroid/content/Context;Lcom/google/firebase/messaging/RemoteMessage;)Z
+	public abstract fun isSallaPushMessage (Lcom/google/firebase/messaging/RemoteMessage;)Z
+	public abstract fun isSallaPushMessage (Ljava/util/Map;)Z
+	public abstract fun onNewToken (Landroid/content/Context;Ljava/lang/String;)V
+	public abstract fun refreshPermission ()V
+	public abstract fun removeClickListener (Lcom/salla/push/SallaPushClickListener;)V
+	public abstract fun removeForegroundLifecycleListener (Lcom/salla/push/SallaPushForegroundLifecycleListener;)V
+	public abstract fun removeNotification (I)V
+	public abstract fun removePermissionObserver (Lcom/salla/push/SallaPushPermissionObserver;)V
+	public abstract fun requestPermission (ZLcom/salla/push/SallaPushPermissionCallback;)V
+	public abstract fun requestPermissionSuspend (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun trackOpened (Lorg/json/JSONObject;)Z
+}
+
+public final class com/salla/push/SallaPushPayloadSource : java/lang/Enum {
+	public static final field COMPAT Lcom/salla/push/SallaPushPayloadSource;
+	public static final field NATIVE Lcom/salla/push/SallaPushPayloadSource;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/salla/push/SallaPushPayloadSource;
+	public static fun values ()[Lcom/salla/push/SallaPushPayloadSource;
+}
+
+public abstract interface class com/salla/push/SallaPushPermissionCallback {
+	public abstract fun onResult (Z)V
+}
+
+public abstract interface class com/salla/push/SallaPushPermissionObserver {
+	public abstract fun onNotificationPermissionChange (Z)V
+}
+
+public abstract interface class com/salla/push/SallaPushSubscription {
+	public abstract fun addObserver (Lcom/salla/push/SallaPushSubscriptionObserver;)V
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getOptedIn ()Z
+	public abstract fun getToken ()Ljava/lang/String;
+	public abstract fun optIn ()V
+	public abstract fun optOut ()V
+	public abstract fun removeObserver (Lcom/salla/push/SallaPushSubscriptionObserver;)V
+}
+
+public final class com/salla/push/SallaPushSubscriptionChangedState {
+	public final fun getCurrent ()Lcom/salla/push/SallaPushSubscriptionState;
+	public final fun getPrevious ()Lcom/salla/push/SallaPushSubscriptionState;
+}
+
+public abstract interface class com/salla/push/SallaPushSubscriptionObserver {
+	public abstract fun onPushSubscriptionChange (Lcom/salla/push/SallaPushSubscriptionChangedState;)V
+}
+
+public final class com/salla/push/SallaPushSubscriptionState {
+	public final fun getId ()Ljava/lang/String;
+	public final fun getOptedIn ()Z
+	public final fun getToken ()Ljava/lang/String;
+}
+
+public abstract interface class com/salla/push/SallaPushUser {
+	public abstract fun addObserver (Lcom/salla/push/SallaPushUserObserver;)V
+	public abstract fun addTag (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun addTags (Ljava/util/Map;)V
+	public abstract fun getExternalId ()Ljava/lang/String;
+	public abstract fun getPushSubscription ()Lcom/salla/push/SallaPushSubscription;
+	public abstract fun getTags ()Ljava/util/Map;
+	public abstract fun isLoggedIn ()Z
+	public abstract fun removeObserver (Lcom/salla/push/SallaPushUserObserver;)V
+	public abstract fun removeTag (Ljava/lang/String;)V
+	public abstract fun removeTags (Ljava/util/Collection;)V
+	public abstract fun setLanguage (Ljava/lang/String;)V
+}
+
+public final class com/salla/push/SallaPushUserChangedState {
+	public final fun getCurrent ()Lcom/salla/push/SallaPushUserState;
+	public final fun getPrevious ()Lcom/salla/push/SallaPushUserState;
+}
+
+public abstract interface class com/salla/push/SallaPushUserObserver {
+	public fun onLoginFailure (Lcom/salla/push/SallaPushLoginFailure;)V
+	public abstract fun onUserStateChange (Lcom/salla/push/SallaPushUserChangedState;)V
+}
+
+public final class com/salla/push/SallaPushUserState {
+	public final fun getExternalId ()Ljava/lang/String;
+	public final fun isLoggedIn ()Z
+}
+
+public final class com/salla/push/SallaPushWillDisplayEvent {
+	public final fun getNotification ()Lcom/salla/push/SallaPushNotification;
+	public final fun isPrevented ()Z
+	public final fun preventDefault ()V
+}
+

@@ -1,0 +1,24 @@
+{
+  "notifications": [
+    {
+      "platform": 2,
+      "tokens": ["dGVzdC1mY20tdG9rZW4tMTIzNDU2Nzg5MA=="],
+      "notif_id": "msg_test_002",
+      "priority": "high",
+      "title": "",
+      "message": "",
+      "image": "",
+      "data": {
+        "sp_v": "1",
+        "sp_id": "msg_test_002",
+        "sp_title": "تم شحن طلبك",
+        "sp_body": "طلبك رقم 987 في الطريق",
+        "sp_image": "https://cdn.salla.sa/x.jpg",
+        "sp_url": "salla://orders/987",
+        "sp_collapse": "order-987",
+        "sp_channel": "orders",
+        "orderId": "987"
+      }
+    }
+  ]
+}

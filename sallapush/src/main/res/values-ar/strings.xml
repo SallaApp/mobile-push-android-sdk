@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The default notification channel's name in Arabic system settings. -->
+    <string name="sallapush_default_channel_name">الإشعارات</string>
+</resources>

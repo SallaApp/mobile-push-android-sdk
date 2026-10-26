@@ -1,0 +1,13 @@
+# Dependabot opens a pull request when an action that the workflows use has a new release, and moves the pinned commit
+# and its version comment together. The library's dependencies and the build tools are pinned on purpose
+# (CONTRIBUTING.md, "What needs care"), so they are not watched here.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    # Pull request titles such as "chore(deps): bump actions/checkout from 7.0.1 to 7.0.2", which lint-pr.yml accepts.
+    commit-message:
+      prefix: chore
+      include: scope

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+
+        <!--
+            Fallback FCM receiver. FCM goes to the highest-priority MESSAGING_EVENT service of the merged manifest: an
+            app's own service (default 0) or another library's ranks above this one, and Firebase's base service (-500)
+            below it. That service then forwards to SallaPush.
+        -->
+        <service
+            android:name="com.salla.push.SallaPushFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter android:priority="-450">
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name="com.salla.push.internal.click.SallaPushNotificationOpenActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
+            android:name="com.salla.push.internal.permission.SallaPushPermissionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <receiver
+            android:name="com.salla.push.internal.click.SallaPushNotificationDismissReceiver"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

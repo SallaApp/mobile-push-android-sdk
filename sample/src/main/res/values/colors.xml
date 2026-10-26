@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sample_primary">#FF00695C</color>
+    <color name="sample_primary_dark">#FF004D40</color>
+    <!-- The notification's accent colour (meta-data com.google.firebase.messaging.default_notification_color). -->
+    <color name="notification_accent">#FF00897B</color>
+</resources>

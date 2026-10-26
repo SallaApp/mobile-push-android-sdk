@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Name of SallaPush's default notification channel, shown in the system settings. Apps override it by defining the same name. -->
+    <string name="sallapush_default_channel_name">Notifications</string>
+</resources>

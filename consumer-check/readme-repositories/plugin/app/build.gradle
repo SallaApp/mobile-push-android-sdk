@@ -1,0 +1,48 @@
+plugins {
+    id 'com.android.application'
+}
+
+// What React Native's Gradle plugin does when an app module applies it (configureRepositories in
+// @react-native/gradle-plugin's DependencyUtils.kt): it adds its repositories to every project of the build. Gradle then
+// ignores any repositories of the settings, so SallaPush comes through the projects' own repositories: mavenCentral()
+// in an app, the stand-in of ../build.gradle here.
+rootProject.allprojects {
+    repositories {
+        mavenCentral()
+        google()
+    }
+}
+
+android {
+    namespace = 'com.salla.push.pluginrepositories'
+    compileSdk = 34
+
+    defaultConfig {
+        minSdk = 23
+    }
+}
+
+dependencies {
+    implementation 'com.salla:mobile-push:1.0.4'
+}
+
+// Resolves the app's debug runtime classpath, as building the app would, and checks that SallaPush came from the local
+// Maven repository: the one ../build.gradle names for com.salla:mobile-push.
+tasks.register('checkSallaPushResolves') {
+    description = "Resolves SallaPush through the projects' own repositories."
+    def classpath = configurations.named('debugRuntimeClasspath')
+    def mavenLocal = repositories.findByName('MavenLocal')
+    doLast {
+        def sdk = classpath.get().incoming.artifacts.artifacts.findAll {
+            it.id.componentIdentifier.displayName == 'com.salla:mobile-push:1.0.4'
+        }
+        if (sdk.isEmpty()) {
+            throw new GradleException('com.salla:mobile-push:1.0.4 is not on the debug runtime classpath')
+        }
+        def root = mavenLocal == null ? null : new File(mavenLocal.url).canonicalPath
+        def outside = sdk*.file.findAll { root == null || !it.canonicalPath.startsWith(root + File.separator) }
+        if (!outside.isEmpty()) {
+            throw new GradleException("SallaPush was resolved from ${outside*.path.join(', ')}, not from the local Maven repository that ../build.gradle names")
+        }
+    }
+}

@@ -1,0 +1,130 @@
+name: Lint PR
+
+# The two checks that the organization's rule set "Pull Requests" requires of every pull request, by their job names:
+# Validate PR title and Validate branch name. They apply the rules of Salla's own checks, which can't run in a public
+# repository, in plain bash: no action and no checkout. The title and the branch name reach the scripts through
+# environment variables, never through the scripts' text.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+# Every step runs in bash -eo pipefail.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # <type>(<scope>): <subject>, matched exactly. The scope is required: a ticket key such as ABC-123, a version such as
+  # 1.2.3, mahlly or mahlly-<suffix>, or one of the scopes listed below. Dependabot's titles pass, such as
+  # "chore(deps): bump actions/checkout from 7.0.1 to 7.0.2" (dependabot.yml). A pull request labelled bot or
+  # ignore-semantic-pull-request skips the check.
+  validate-pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 'The title reads <type>(<scope>): <subject>'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          SKIP: ${{ contains(github.event.pull_request.labels.*.name, 'bot') || contains(github.event.pull_request.labels.*.name, 'ignore-semantic-pull-request') }}
+        run: |
+          set -euo pipefail
+          example='fix(mobile): keep the badge count after a logout'
+          if [ "$SKIP" = true ]; then
+            echo "The pull request is labelled bot or ignore-semantic-pull-request, so its title is not checked."
+            exit 0
+          fi
+          printf 'Title: %s\n' "$TITLE"
+          types=(docs fix hotfix feat 'BREAKING CHANGE' refactor test perf build ci revert chore release)
+          scopes=(catalog orders payments checkout journey partners platforms themes auth marketing shipping devops
+            security pos mobile ui core deps deps-dev sc data i18n)
+          header='^([A-Za-z0-9_]+( [A-Za-z0-9_]+)*)(\(([A-Za-z0-9_$.* -]*)\))?: (.*)$'
+          ticket='^[A-Z]+-[0-9]+$'
+          version='^v?([0-9]+\.)?([0-9]+\.)?(\*|[0-9]+)$'
+          mahlly='^mahlly(-.+)?$'
+          # listed <word> <item...>: the word is one of the items, exactly.
+          listed() {
+            local word="$1" item
+            shift
+            for item in "$@"; do
+              [ "$word" != "$item" ] || return 0
+            done
+            return 1
+          }
+          # joined <item...>: the items, separated by commas.
+          joined() {
+            local list
+            list="$(printf '%s, ' "$@")"
+            printf '%s' "${list%, }"
+          }
+          if ! [[ "$TITLE" =~ $header ]]; then
+            echo "::error::The title must read <type>(<scope>): <subject>, with a colon and a space after the scope."
+            echo "A title that passes: $example"
+            exit 1
+          fi
+          kind="${BASH_REMATCH[1]}"
+          parentheses="${BASH_REMATCH[3]}"
+          scope="${BASH_REMATCH[4]}"
+          subject="${BASH_REMATCH[5]}"
+          failed=false
+          if ! listed "$kind" "${types[@]}"; then
+            echo "::error::$kind is not a type. Use one of: $(joined "${types[@]}")."
+            failed=true
+          fi
+          if [ -z "$parentheses" ] || [ -z "$scope" ]; then
+            echo "::error::The title has no scope: write it in parentheses after the type."
+            failed=true
+          elif ! listed "$scope" "${scopes[@]}" && ! [[ "$scope" =~ $ticket ]] && ! [[ "$scope" =~ $version ]] &&
+            ! [[ "$scope" =~ $mahlly ]]; then
+            echo "::error::$scope is not a scope. Use a ticket key such as ABC-123, a version such as 1.2.3, mahlly or mahlly-<suffix>, or one of: $(joined "${scopes[@]}")."
+            failed=true
+          fi
+          if [ -z "$subject" ]; then
+            echo "::error::The title has no subject: write it after the colon and the space."
+            failed=true
+          fi
+          if [ "$failed" = true ]; then
+            echo "A title that passes: $example"
+            exit 1
+          fi
+          echo "The title passes: the type $kind, the scope $scope."
+
+  # Matched without regard to case: <type>/<ticket key>-<number>, then optional words after a dash, where the type is
+  # feature, bugfix, hotfix or test; dependabot/<anything>; or release/<version> (the v is optional).
+  validate-branch-name:
+    name: Validate branch name
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: The branch name is a ticket branch, a Dependabot branch or a release branch
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          printf 'Branch: %s\n' "$BRANCH"
+          shopt -s nocasematch
+          ticket='(bugfix|hotfix|feature|test)/[a-zA-Z0-9]+-[0-9]{1,10}(-[^/]+)?$'
+          dependabot='^dependabot/[a-zA-Z0-9_]+.+'
+          release='release/v?([0-9]+\.)?([0-9]+\.)?(\*|[0-9]+)'
+          if [[ "$BRANCH" =~ $ticket ]] || [[ "$BRANCH" =~ $dependabot ]] || [[ "$BRANCH" =~ $release ]]; then
+            echo "The branch name passes."
+            exit 0
+          fi
+          example='feature/ABC-123-badge-count'
+          case "$BRANCH" in
+            bugfix/* | hotfix/* | feature/* | test/*)
+              echo "::error::After the type comes the ticket key, a dash and the ticket number (up to 10 digits), then optional words after a dash, with no other /."
+              ;;
+            release/*)
+              echo "::error::A release branch is release/ and a version, with the v optional."
+              example='release/v1.2.3'
+              ;;
+            *)
+              echo "::error::The branch name must start with feature/, bugfix/, hotfix/ or test/; fix/, feat/, docs/ and chore/ are not branch types."
+              ;;
+          esac
+          echo "A branch name that passes: $example"
+          exit 1

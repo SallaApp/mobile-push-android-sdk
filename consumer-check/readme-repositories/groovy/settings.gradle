@@ -1,0 +1,13 @@
+// README.md's repository block, which README.md says reads the same in a Groovy settings.gradle, verbatim.
+// ../../settings.gradle.kts includes this build, so every consumer check evaluates the block as a Groovy settings
+// script: a block that isn't valid Groovy fails the build. Nothing is resolved from it.
+// snippet:repositories
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+// end-snippet
+
+rootProject.name = "readme-repositories-groovy"

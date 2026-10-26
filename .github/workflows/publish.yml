@@ -1,0 +1,306 @@
+name: Publish
+
+# A release of the SDK is a tag X.Y.Z or X.Y.Z-(alpha|beta|rc).N on this repository, the version itself without a "v"
+# (docs/RELEASING.md). Release tags are never moved or deleted: a tag that these checks refuse publishes
+# nothing and stays, and the fix is released as the next version. What was released is what Maven Central holds.
+# Pushing the tag runs four jobs, each after the one before succeeded:
+#   release         checks the tag before anything is built (scripts/release-plan.sh): the version grammar, its commit
+#                   on a branch of this repository (never a commit that only a fork's pull request holds, since the
+#                   publish job builds it with the release key), the tagged commit's VERSION_NAME and CHANGELOG entry,
+#                   and, for a stable version, its commit on master, no later stable version on Maven Central, and every
+#                   declaration of the public API of the previous release (scripts/api-compat.sh) unless the major
+#                   version grew: the highest stable version below it on Maven Central, or, before the first one there,
+#                   the last release before Maven Central. A refused tag published nothing, and the releases below
+#                   the first public release (SDK_API_BASELINE_FLOOR in scripts/common.sh) were never public, so
+#                   their API is never that baseline. A stable tag above that baseline that Maven Central lacks stops
+#                   the release, unless CHANGELOG.md marks it "## [X.Y.Z] - Not released": its deployment may still
+#                   wait in the Central Portal.
+#   verify          ci.yml, every check of a pull request, on the tagged commit.
+#   publish         in the protected environment release: runs the release checks again against Maven Central as it is
+#                   by then, one stable version at a time, then builds that commit's AAR, signs it and uploads it to the
+#                   Central Portal as a deployment. A maintainer then publishes the deployment in the Central Portal.
+#   github-release  in the same environment, once Maven Central serves the version: the GitHub Release of the tag,
+#                   with the version's CHANGELOG entry. Before that it fails, and is re-run once Maven Central serves
+#                   the version.
+# Maven Central never changes or deletes a published file, so a published version never changes. A failed run is re-run
+# from the Actions tab once its cause is fixed; a release with a defect is fixed by a new version.
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+
+# Nothing at the workflow level: each job asks for what it needs.
+permissions: {}
+
+# Every step runs in bash -eo pipefail. Without a shell, a step runs in bash -e, which ignores a failure on the left of
+# a pipe.
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release checks
+    # A fork or a copy of this repository never publishes. Deleting a tag also sends a push event, although the tag
+    # ruleset forbids it.
+    if: github.repository == 'SallaApp/mobile-push-android-sdk' && github.event.deleted != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      prerelease: ${{ steps.plan.outputs.prerelease }}
+      sha: ${{ steps.plan.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The checks read every branch, master included, and the earlier release tags.
+          fetch-depth: 0
+          persist-credentials: false
+      # The plan goes through a variable, never a pipe, so a refused tag fails this step in any shell.
+      - name: The tag, its version, its CHANGELOG entry, and master and Maven Central for a stable version
+        id: plan
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          plan="$(scripts/release-plan.sh "$TAG")"
+          printf '%s\n' "$plan"
+          printf '%s\n' "$plan" >>"$GITHUB_OUTPUT"
+      - name: No API break since ${{ steps.plan.outputs.api_baseline }}
+        if: steps.plan.outputs.api_baseline != '' && steps.plan.outputs.major_bump == 'false'
+        env:
+          API_BASELINE: ${{ steps.plan.outputs.api_baseline }}
+          SHA: ${{ steps.plan.outputs.sha }}
+        run: scripts/api-compat.sh "refs/tags/$API_BASELINE" "$SHA"
+
+  verify:
+    name: Verify
+    needs: release
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ needs.release.outputs.sha }}
+
+  publish:
+    name: Publish to Maven Central
+    needs: [release, verify]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # The environment holds the Central Portal token and the signing key, and its rules decide who may run this job.
+    environment: release
+    permissions:
+      contents: read
+    outputs:
+      group_path: ${{ steps.coordinates.outputs.group_path }}
+    # Stable versions publish one at a time, so that each one's checks see every stable version published before it.
+    # GitHub keeps one job waiting per group: a third stable version cancels the one waiting, and that run is re-run.
+    concurrency:
+      group: ${{ needs.release.outputs.prerelease == 'true' && format('publish-pre-release-{0}', github.ref) || 'publish-stable-versions' }}
+      cancel-in-progress: false
+    steps:
+      # Before anything is checked out: nothing is built or published from an empty or malformed plan.
+      - name: The release job resolved a version and a commit
+        env:
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.release.outputs.version }}
+          SHA: ${{ needs.release.outputs.sha }}
+          PRERELEASE: ${{ needs.release.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          [ -n "$VERSION" ] && [ "$VERSION" = "$TAG" ] ||
+            { echo "::error::the release job resolved the version '$VERSION' for the tag $TAG"; exit 1; }
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::the release job resolved no commit ('$SHA')"; exit 1; }
+          [ "$PRERELEASE" = true ] || [ "$PRERELEASE" = false ] ||
+            { echo "::error::the release job resolved no pre-release flag ('$PRERELEASE')"; exit 1; }
+
+      # The commit the release job resolved and the verify job verified, whatever the tag points at by now.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release.outputs.sha }}
+          # The checks read every branch, master included, and the earlier release tags.
+          fetch-depth: 0
+          persist-credentials: false
+      # Maven Central may have changed since the release job: another stable version published meanwhile, or this job
+      # re-run alone. These results decide.
+      - name: The release checks again, against Maven Central as it is now
+        id: plan
+        env:
+          TAG: ${{ github.ref_name }}
+          SHA: ${{ needs.release.outputs.sha }}
+        run: |
+          set -euo pipefail
+          plan="$(scripts/release-plan.sh "$TAG")"
+          printf '%s\n' "$plan"
+          [ "$(printf '%s\n' "$plan" | sed -n 's/^sha=//p')" = "$SHA" ] || {
+            echo "::error::the tag $TAG no longer points at $SHA, the commit the release job resolved and the verify job verified"
+            exit 1
+          }
+          printf '%s\n' "$plan" >>"$GITHUB_OUTPUT"
+      - name: No API break since ${{ steps.plan.outputs.api_baseline }}
+        if: steps.plan.outputs.api_baseline != '' && steps.plan.outputs.major_bump == 'false'
+        env:
+          API_BASELINE: ${{ steps.plan.outputs.api_baseline }}
+          SHA: ${{ needs.release.outputs.sha }}
+        run: scripts/api-compat.sh "refs/tags/$API_BASELINE" "$SHA"
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      # Validates gradle-wrapper.jar against Gradle's published checksums (validate-wrappers is on by default), and
+      # restores no cache, because this job holds the signing key: a cache entry could hold an init script, or an
+      # extracted Gradle distribution that the wrapper reuses without checking distributionSha256Sum.
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          cache-disabled: true
+
+      - name: Coordinates
+        id: coordinates
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          [ -n "$VERSION" ] || { echo "::error::the release job resolved no version"; exit 1; }
+          declared="$(sed -nE 's/^[[:space:]]*VERSION_NAME[[:space:]]*=[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p' gradle.properties | tr -d '\r')"
+          group="$(sed -nE 's/^[[:space:]]*GROUP[[:space:]]*=[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p' gradle.properties | tr -d '\r')"
+          [ "$declared" = "$VERSION" ] || { echo "::error::gradle.properties declares VERSION_NAME=$declared, the release is $VERSION"; exit 1; }
+          [ -n "$group" ] || { echo "::error::gradle.properties has no GROUP"; exit 1; }
+          echo "group=$group" >> "$GITHUB_OUTPUT"
+          echo "group_path=$(printf '%s' "$group" | tr . /)" >> "$GITHUB_OUTPUT"
+
+      # A re-run of a version that Maven Central already serves is a no-op. .github/scripts/publication-state.sh checks
+      # the POM, the AAR, the Gradle module metadata, the sources jar and the javadoc jar; the Central Portal publishes
+      # them together, and refuses a deployment of a version it already holds.
+      - name: Skip a version that Maven Central already serves
+        id: exists
+        env:
+          GROUP_PATH: ${{ steps.coordinates.outputs.group_path }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: bash .github/scripts/publication-state.sh https://repo1.maven.org/maven2 "$GROUP_PATH" mobile-push "$VERSION"
+
+      # The secrets of the environment release: the Central Portal user token and the signing key, with its passphrase.
+      - name: The release environment holds the Central Portal token and the signing key
+        if: steps.exists.outputs.published != 'true'
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          missing=""
+          for name in MAVEN_CENTRAL_USERNAME MAVEN_CENTRAL_PASSWORD SIGNING_KEY SIGNING_KEY_PASSWORD; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          [ -z "$missing" ] || { echo "::error::the environment release has no secret$missing"; exit 1; }
+
+      # The build signs every file with the release key and uploads them as one deployment, which waits in the Central
+      # Portal until a maintainer publishes it (sallapush/build.gradle.kts publishes only when GITHUB_REPOSITORY is this
+      # repository). --no-parallel keeps the build's order.
+      - name: Build, sign and upload to the Central Portal
+        if: steps.exists.outputs.published != 'true'
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon --no-parallel --stacktrace :sallapush:publishToMavenCentral
+
+      - name: Summary
+        env:
+          GROUP: ${{ steps.coordinates.outputs.group }}
+          VERSION: ${{ needs.release.outputs.version }}
+          SHA: ${{ needs.release.outputs.sha }}
+          PRERELEASE: ${{ needs.release.outputs.prerelease }}
+          PUBLISHED_BEFORE: ${{ steps.exists.outputs.published }}
+          API_BASELINE: ${{ steps.plan.outputs.api_baseline }}
+          API_BASELINE_SOURCE: ${{ steps.plan.outputs.api_baseline_source }}
+          MAJOR_BUMP: ${{ steps.plan.outputs.major_bump }}
+        run: |
+          set -euo pipefail
+          if [ "$PUBLISHED_BEFORE" = true ]; then
+            state="was already on Maven Central, so this run uploaded nothing"
+            next="Nothing to do."
+          else
+            state="is uploaded to the Central Portal as a deployment"
+            next="To release it, publish the deployment in the Central Portal (Publishing, then Deployments). Maven Central serves it within about 30 minutes, and never changes it afterwards. Then approve the GitHub Release job, or re-run it if it ran before."
+          fi
+          kind="stable release"
+          [ "$PRERELEASE" != true ] || kind="pre-release"
+          baseline="$API_BASELINE"
+          [ "$API_BASELINE_SOURCE" != tag ] || baseline="$API_BASELINE, the last release before Maven Central"
+          if [ "$PRERELEASE" = true ]; then
+            api="not compared (pre-release)"
+          elif [ "$PUBLISHED_BEFORE" = true ]; then
+            api="checked when it was first published"
+          elif [ -z "$API_BASELINE" ]; then
+            api="not compared (no earlier public release)"
+          elif [ "$MAJOR_BUMP" = true ]; then
+            api="not compared (a new major version after $baseline)"
+          else
+            api="no break since $baseline"
+          fi
+          {
+            echo "### $GROUP:mobile-push:$VERSION"
+            echo
+            echo "The $kind $state. Commit: \`$SHA\`. Public API: $api."
+            echo
+            echo "$next"
+            echo
+            echo "Apps depend on \`implementation(\"$GROUP:mobile-push:$VERSION\")\` with \`mavenCentral()\` among their repositories."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  github-release:
+    name: GitHub Release
+    needs: [release, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release.outputs.sha }}
+          persist-credentials: false
+      # The publish job only uploads a deployment: a maintainer publishes it in the Central Portal, which may still refuse
+      # it, and Maven Central serves it some time later. A version that Maven Central never received gets no GitHub
+      # Release.
+      - name: Maven Central serves the version
+        env:
+          GROUP_PATH: ${{ needs.publish.outputs.group_path }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          [ -n "$GROUP_PATH" ] || { echo "::error::the publish job resolved no group"; exit 1; }
+          state="$RUNNER_TEMP/publication-state"
+          GITHUB_OUTPUT="$state" bash .github/scripts/publication-state.sh https://repo1.maven.org/maven2 "$GROUP_PATH" mobile-push "$VERSION"
+          grep -qx 'published=true' "$state" || {
+            echo "::error::Maven Central does not serve $VERSION yet: publish the deployment in the Central Portal (Publishing, then Deployments), wait until Maven Central serves it, then re-run this job"
+            exit 1
+          }
+      - name: The GitHub Release of the tag, with its CHANGELOG entry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.release.outputs.version }}
+          PRERELEASE: ${{ needs.release.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "The GitHub Release $TAG exists already; nothing to do."
+            exit 0
+          fi
+          bash .github/scripts/release-notes.sh "$VERSION" >"$RUNNER_TEMP/release-notes.md"
+          flags=()
+          [ "$PRERELEASE" != true ] || flags+=(--prerelease)
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$VERSION" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" ${flags[@]+"${flags[@]}"}

@@ -1,0 +1,26 @@
+# Gradle and Kotlin
+.gradle/
+.kotlin/
+build/
+captures/
+.cxx/
+.externalNativeBuild/
+
+# Machine-specific settings: the SDK location comes from ANDROID_HOME, never from local.properties
+local.properties
+
+# IDEs and operating systems
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Heap dumps
+*.hprof
+
+# Credentials and signing material, which never belong in this repository (scripts/verify.sh tree refuses them too)
+*.jks
+*.keystore
+google-services.json
+.env
+.env.*

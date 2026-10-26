@@ -1,0 +1,16 @@
+plugins {
+    id 'com.android.application' version '8.7.3' apply false
+}
+
+// The stand-in for Maven Central, as in ../../settings.gradle.kts: com.salla:mobile-push from mavenLocal() only, where
+// publishToMavenLocal puts the AAR. An app adds nothing here, since React Native's plugin adds mavenCentral().
+allprojects {
+    repositories {
+        exclusiveContent {
+            forRepository {
+                mavenLocal()
+            }
+            filter { includeModule("com.salla", "mobile-push") }
+        }
+    }
+}

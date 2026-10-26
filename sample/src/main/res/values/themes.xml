@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SampleTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/sample_primary</item>
+        <item name="android:colorPrimaryDark">@color/sample_primary_dark</item>
+        <item name="android:colorAccent">@color/notification_accent</item>
+    </style>
+</resources>
