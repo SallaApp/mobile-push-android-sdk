@@ -49,7 +49,7 @@ jobs:
     # A fork or a copy of this repository never publishes. Deleting a tag also sends a push event, although the tag
     # ruleset forbids it.
     if: github.repository == 'SallaApp/mobile-push-android-sdk' && github.event.deleted != true
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.RUNS_ON) }}
     timeout-minutes: 10
     permissions:
       contents: read
@@ -92,7 +92,7 @@ jobs:
   publish:
     name: Publish to Maven Central
     needs: [release, verify]
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.RUNS_ON) }}
     timeout-minutes: 30
     # The environment holds the Central Portal token and the signing key, and its rules decide who may run this job.
     environment: release
@@ -261,7 +261,7 @@ jobs:
   github-release:
     name: GitHub Release
     needs: [release, publish]
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.RUNS_ON) }}
     timeout-minutes: 10
     environment: release
     permissions:
