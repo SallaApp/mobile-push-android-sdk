@@ -48,7 +48,7 @@ public object SallaPush {
     public val isInitialized: Boolean
         get() = entryValue("isInitialized", false) { Sdk.core.isInitialized }
 
-    /** This SDK's version, for example "1.0.4". */
+    /** This SDK's version, for example "1.1.0". */
     @JvmStatic
     public val sdkVersion: String
         get() = BuildConfig.SDK_VERSION

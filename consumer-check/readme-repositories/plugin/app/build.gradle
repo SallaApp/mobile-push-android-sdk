@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.salla:mobile-push:1.0.4'
+    implementation 'com.salla:mobile-push:1.1.0'
 }
 
 // Resolves the app's debug runtime classpath, as building the app would, and checks that SallaPush came from the local
@@ -34,10 +34,10 @@ tasks.register('checkSallaPushResolves') {
     def mavenLocal = repositories.findByName('MavenLocal')
     doLast {
         def sdk = classpath.get().incoming.artifacts.artifacts.findAll {
-            it.id.componentIdentifier.displayName == 'com.salla:mobile-push:1.0.4'
+            it.id.componentIdentifier.displayName == 'com.salla:mobile-push:1.1.0'
         }
         if (sdk.isEmpty()) {
-            throw new GradleException('com.salla:mobile-push:1.0.4 is not on the debug runtime classpath')
+            throw new GradleException('com.salla:mobile-push:1.1.0 is not on the debug runtime classpath')
         }
         def root = mavenLocal == null ? null : new File(mavenLocal.url).canonicalPath
         def outside = sdk*.file.findAll { root == null || !it.canonicalPath.startsWith(root + File.separator) }

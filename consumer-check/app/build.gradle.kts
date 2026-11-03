@@ -33,7 +33,7 @@ android {
 
 // snippet:dependency
 dependencies {
-    implementation("com.salla:mobile-push:1.0.4")
+    implementation("com.salla:mobile-push:1.1.0")
 }
 // end-snippet
 

@@ -273,7 +273,7 @@ internal class FakeDeviceInfo : DeviceInfoSource {
     var language: String? = "ar"
     var zone: String? = "Asia/Riyadh"
 
-    override fun facts(): DeviceFacts = DeviceFacts(appVersion, "1.0.4", osVersion, model)
+    override fun facts(): DeviceFacts = DeviceFacts(appVersion, "1.1.0", osVersion, model)
 
     override fun deviceLanguage(): String? = language
 

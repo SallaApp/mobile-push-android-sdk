@@ -36,7 +36,7 @@ class RegistrationTest : SdkTestBase() {
         assertEquals(Harness.FCM_TOKEN, body.getString("push_token"))
         assertTrue(body.getBoolean("opted_in"))
         assertEquals("5.0.37", body.getString("app_version"))
-        assertEquals("1.0.4", body.getString("sdk_version"))
+        assertEquals("1.1.0", body.getString("sdk_version"))
         assertEquals("14", body.getString("os_version"))
         assertEquals("Pixel 8", body.getString("device_model"))
         assertEquals("ar", body.getString("language"))

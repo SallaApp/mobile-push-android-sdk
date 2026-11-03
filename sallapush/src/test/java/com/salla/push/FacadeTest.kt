@@ -24,7 +24,7 @@ class FacadeTest : SdkTestBase() {
     fun test_gettersBeforeInitialize_areSafeDefaults() {
         assertFalse(SallaPush.isInitialized)
         assertNull(SallaPush.appId)
-        assertEquals("1.0.4", SallaPush.sdkVersion)
+        assertEquals("1.1.0", SallaPush.sdkVersion)
         assertNull(SallaPush.User.externalId)
         assertFalse(SallaPush.User.isLoggedIn)
         assertNull(SallaPush.User.pushSubscription.id)
@@ -446,7 +446,7 @@ class FacadeTest : SdkTestBase() {
     fun test_appVersionOverride_winsOverPackageVersion_andValuesAreTruncated() {
         val withOverride = com.salla.push.internal.device.AndroidDeviceInfo(h.context) { "9.9.9" }
         assertEquals("9.9.9", withOverride.facts().appVersion)
-        assertEquals("1.0.4", withOverride.facts().sdkVersion)
+        assertEquals("1.1.0", withOverride.facts().sdkVersion)
         val longOverride = com.salla.push.internal.device.AndroidDeviceInfo(h.context) { "v".repeat(40) }
         assertEquals(32, longOverride.facts().appVersion?.length)
         // The device language is reduced to its language part; an app language is sent as given (UpdateTest).
