@@ -9,7 +9,7 @@ Push notifications for the Android apps of Salla stores, from Kotlin and Java.
 
 > **SallaPush is for the mobile apps of Salla stores.** Contact the Salla team for your app id.
 
-- **Version:** 1.1.0. See [CHANGELOG.md](CHANGELOG.md).
+- **Version:** 1.1.0-rc.1. See [CHANGELOG.md](CHANGELOG.md).
 - **Also for:** [iOS](https://github.com/SallaApp/mobile-push-ios-sdk) ·
   [Flutter](https://github.com/SallaApp/mobile-push-sdk/tree/master/flutter) ·
   [React Native](https://github.com/SallaApp/mobile-push-sdk/tree/master/react-native) ·
@@ -52,13 +52,13 @@ Then add the dependency to your app module's `build.gradle.kts`:
 <!-- snippet:consumer-check/app/build.gradle.kts#dependency -->
 ```kotlin
 dependencies {
-    implementation("com.salla:mobile-push:1.1.0")
+    implementation("com.salla:mobile-push:1.1.0-rc.1")
 }
 ```
 
 - **Groovy:** the repository block reads the same in `settings.gradle`, and the dependency is
-  `implementation 'com.salla:mobile-push:1.1.0'` in the app module's `build.gradle`.
-- **Version catalog:** declare `sallapush = { module = "com.salla:mobile-push", version = "1.1.0" }` under
+  `implementation 'com.salla:mobile-push:1.1.0-rc.1'` in the app module's `build.gradle`.
+- **Version catalog:** declare `sallapush = { module = "com.salla:mobile-push", version = "1.1.0-rc.1" }` under
   `[libraries]` in `gradle/libs.versions.toml`, and write `implementation(libs.sallapush)`.
 - **Projects with repositories of their own,** declared in a build file or added by a plugin as in React Native apps:
   add `mavenCentral()` there too.

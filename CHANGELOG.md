@@ -5,7 +5,7 @@ All notable changes to the SallaPush Android SDK (`com.salla:mobile-push`). The 
 
 ## [Unreleased]
 
-## [1.1.0] - 2026-11-03
+## [1.1.0-rc.1] - 2026-11-03
 
 The first public release of the SallaPush Android SDK, for the mobile apps of Salla stores.
 

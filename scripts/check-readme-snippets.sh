@@ -1007,7 +1007,7 @@ def self_test(android):
          "has no exclusiveContent part that takes com.salla:mobile-push from mavenLocal() only"),
         # Version, dependencies, minimum API level.
         ("the README names another version",
-         lambda root: edit(root, README, "- **Version:** 1.1.0", "- **Version:** 9.9.9"),
+         lambda root: edit(root, README, "- **Version:** 1.1.0-rc.1", "- **Version:** 9.9.9"),
          "names version 9.9.9"),
         ("the README names another dependency version",
          lambda root: edit(root, README, "androidx.core:core:1.13.1", "androidx.core:core:1.12.0"),
