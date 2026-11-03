@@ -32,7 +32,7 @@ defaults:
 jobs:
   android-sdk:
     name: android-sdk
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.RUNS_ON) }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -101,7 +101,7 @@ jobs:
   # API (the docker-content-digest of manifests/v0.11.0); the iOS SDK pins the same one.
   shell-scripts:
     name: Shell scripts
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.RUNS_ON) }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -123,7 +123,7 @@ jobs:
     name: Testing Ready
     if: always()
     needs: [android-sdk, shell-scripts]
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.RUNS_ON) }}
     timeout-minutes: 5
     permissions: {}
     steps:
