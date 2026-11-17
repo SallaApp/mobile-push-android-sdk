@@ -30,7 +30,7 @@ Push notifications for the Android apps of Salla stores, from Kotlin and Java.
 | Push | Firebase Cloud Messaging, on devices with Google Play services |
 
 SallaPush brings `com.google.firebase:firebase-messaging:24.1.0`, `androidx.core:core:1.13.1`,
-`androidx.work:work-runtime:2.9.1` and `org.jetbrains.kotlin:kotlin-stdlib:1.9.24`. A newer version in your app wins.
+`androidx.work:work-runtime:2.9.1` and `org.jetbrains.kotlin:kotlin-stdlib:2.0.21`. A newer version in your app wins.
 
 ## Installation
 

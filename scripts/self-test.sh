@@ -325,7 +325,7 @@ write_pom() {
   </scm>
   <dependencies>
     <dependency><groupId>com.google.firebase</groupId><artifactId>firebase-messaging</artifactId><version>24.1.0</version><scope>${2:-compile}</scope></dependency>
-    <dependency><groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-stdlib</artifactId><version>1.9.24</version><scope>compile</scope></dependency>
+    <dependency><groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-stdlib</artifactId><version>2.0.21</version><scope>compile</scope></dependency>
     <dependency><groupId>androidx.core</groupId><artifactId>core</artifactId><version>1.13.1</version><scope>runtime</scope></dependency>
     <dependency><groupId>androidx.work</groupId><artifactId>work-runtime</artifactId><version>2.9.1</version><scope>runtime</scope></dependency>${3:-}
   </dependencies>

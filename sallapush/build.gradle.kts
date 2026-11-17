@@ -53,11 +53,11 @@ android {
 
 kotlin {
     explicitApi()
-    coreLibrariesVersion = "1.9.24"
+    coreLibrariesVersion = "2.0.21"
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
-        languageVersion.set(KotlinVersion.KOTLIN_1_9)
-        apiVersion.set(KotlinVersion.KOTLIN_1_9)
+        languageVersion.set(KotlinVersion.KOTLIN_2_0)
+        apiVersion.set(KotlinVersion.KOTLIN_2_0)
         // No Kotlin null-check intrinsics: a Java null must reach the guarded body of every public entry instead of throwing first.
         freeCompilerArgs.addAll("-Xno-param-assertions", "-Xno-call-assertions", "-Xno-receiver-assertions", "-Xjvm-default=all")
     }
