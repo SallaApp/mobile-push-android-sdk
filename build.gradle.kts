@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library") version "8.7.3" apply false
     id("com.android.application") version "8.7.3" apply false
-    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+    id("org.jetbrains.kotlin.android") version "2.4.21" apply false
     // Publishing to Maven Central (sallapush/build.gradle.kts): the newest release that supports Gradle 8.12 and the
     // Android Gradle plugin 8.7; 0.35.0 needs Gradle 8.13.
     id("com.vanniktech.maven.publish") version "0.34.0" apply false
